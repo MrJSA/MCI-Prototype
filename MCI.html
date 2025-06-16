@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonyme Meldestelle für Korruptionsfälle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 75vw;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .text-block {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+
+        .button-primary {
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button-primary:hover {
+            background-color: #219a52;
+        }
+
+        .button-secondary {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button-secondary:hover {
+            background-color: #2980b9;
+        }
+
+        .button-neutral {
+            background-color: #95a5a6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button-neutral:hover {
+            background-color: #7f8c8d;
+        }
+
+        .help-chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: background-color 0.3s;
+        }
+
+        .help-chat-button:hover {
+            background-color: #c0392b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #3498db;
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .chat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: none;
+        }
+
+        .chat-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-window {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            height: 70%;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+        }
+
+        .chat-message.system {
+            background-color: #e8f4f8;
+            color: #2c3e50;
+        }
+
+        .chat-message.user {
+            background-color: #3498db;
+            color: white;
+            margin-left: 20%;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+        }
+
+        .tracking-code {
+            background-color: #f39c12;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .summary-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .summary-section p {
+            margin-bottom: 5px;
+        }
+        .summary-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .edit-button {
+            background-color: #f39c12;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .edit-button:hover {
+            background-color: #e67e22;
+        }
+
+        .mood-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .mood-button {
+            background-color: #ecf0f1;
+            color: #34495e;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .mood-button:hover {
+            background-color: #bdc3c7;
+        }
+
+        .mood-button.selected {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .anonymity-indicator {
+            background-color: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .status-item {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #bdc3c7;
+            background-color: #f8f9fa;
+        }
+
+        .status-item.completed {
+            border-left-color: #27ae60;
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-item.active {
+            border-left-color: #f39c12;
+            background-color: #fff3cd;
+            color: #856404;
+            animation: pulse 2s infinite;
+        }
+
+        .status-item.pending {
+            border-left-color: #bdc3c7;
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .report-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .report-section h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 5px;
+        }
+
+        .tracking-input-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        #tracking-input {
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Styles for new security configuration screen (screen2a) */
+        .security-features-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Single column for now, can be 1fr 1fr for wider screens */
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .security-feature {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .feature-label {
+            font-weight: bold;
+            color: #34495e;
+            flex-grow: 1;
+        }
+
+        .feature-toggle .toggle-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 5px;
+            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+            min-width: 70px; /* Ensure buttons have a decent width */
+        }
+
+        .feature-toggle .toggle-btn.plus-btn { /* Represents "Yes" or "Active" */
+            background-color: #ecf0f1;
+            color: #34495e;
+        }
+        .feature-toggle .toggle-btn.plus-btn:hover {
+            background-color: #d0d9db;
+        }
+        .feature-toggle .toggle-btn.plus-btn.active {
+            background-color: #27ae60; /* Green for active */
+            color: white;
+            box-shadow: 0 0 5px rgba(39, 174, 96, 0.5);
+        }
+
+        .feature-toggle .toggle-btn.cross-btn { /* Represents "No" or "Inactive" */
+            background-color: #ecf0f1;
+            color: #34495e;
+        }
+        .feature-toggle .toggle-btn.cross-btn:hover {
+            background-color: #d0d9db;
+        }
+        .feature-toggle .toggle-btn.cross-btn.active {
+            background-color: #c0392b; /* Reddish for inactive */
+            color: white;
+            box-shadow: 0 0 5px rgba(192, 57, 43, 0.5);
+        }
+        
+        .text-success { color: #27ae60; font-weight: bold; }
+        .text-danger { color: #c0392b; font-weight: bold; }
+
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            
+            .chat-window {
+                width: 95%;
+                height: 80%;
+            }
+            .security-feature {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .feature-toggle {
+                margin-top: 10px;
+                width: 100%;
+                display: flex;
+                justify-content: space-around;
+            }
+            .feature-toggle .toggle-btn {
+                flex-grow: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="screen1" class="screen active">
+            <h1>Willkommen bei der anonymen Meldestelle für Korruptionsfälle</h1>
+            
+            <div class="text-block">
+                <p>Ihre Sicherheit und Anonymität haben für uns höchste Priorität. Hier können Sie sicher und vertraulich Missstände melden. Wir nehmen Ihre Hinweise ernst und tragen gemeinsam zu Transparenz und Gerechtigkeit bei (SDG 16).</p>
+            </div>
+            
+            <div class="text-block">
+                <p><strong>Wie funktioniert es?</strong> Klicken Sie auf 'Sichere Meldung starten', um durch den Prozess geführt zu werden. Ihre Identität bleibt geschützt.</p>
+            </div>
+            
+            <button class="button-primary" onclick="showScreen('screen2')">Sichere Meldung starten</button>
+            <button class="button-secondary" onclick="openChat()">Fragen? Anonymer Hilfe-Chat</button>
+            <button class="button-neutral" onclick="showScreen('tracking-lookup')">Status mit Tracking-Code prüfen</button>
+            
+            <div class="footer">
+                <p>🔒 SSL-verschlüsselt | 🚫 Keine IP-Logs | ✅ Vollständig anonym</p>
+            </div>
+        </div>
+
+        <div id="screen2" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <h1>Ihre Sicherheitseinstellungen</h1>
+            
+            <div class="text-block">
+                <p>Unsere Plattform ist standardmäßig für hohe Anonymität konzipiert. Sie können direkt fortfahren oder Ihre Sicherheitsoptionen überprüfen und symbolisch anpassen.</p>
+            </div>
+            
+            <button class="button-primary" onclick="showScreen('screen3')">Mit Standard-Sicherheit fortfahren</button>
+            <button class="button-secondary" onclick="showScreen('screen2a')">Erweiterte Sicherheitsoptionen anpassen</button>
+            <button class="button-neutral" onclick="showScreen('screen1')">Zurück zur Startseite</button>
+        </div>
+
+        <div id="screen2a" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <h1>Erweiterte Sicherheitsoptionen anpassen</h1>
+            
+            <div class="text-block">
+                <p>Passen Sie hier symbolisch Ihre gewünschten Sicherheitsfeatures an. Standardmäßig sind bereits hohe Schutzmaßnahmen auf unserer Plattform aktiv.</p>
+                <p><em>Ihre Auswahl hier ist symbolisch und dient dazu, Ihr Bewusstsein für Sicherheitspraktiken zu schärfen.</em></p>
+            </div>
+
+            <div class="security-features-grid">
+                <div class="security-feature">
+                    <span class="feature-label">VPN nutzen</span>
+                    <div class="feature-toggle">
+                        <button class="toggle-btn plus-btn active" data-option="vpn" data-enabled="true" onclick="selectSecurityFeature(this)">Ja</button>
+                        <button class="toggle-btn cross-btn" data-option="vpn" data-enabled="false" onclick="selectSecurityFeature(this)">Nein</button>
+                    </div>
+                </div>
+                <div class="security-feature">
+                    <span class="feature-label">Cookie-Sperre (Browser-Einstellung)</span>
+                    <div class="feature-toggle">
+                        <button class="toggle-btn plus-btn" data-option="cookieblock" data-enabled="true" onclick="selectSecurityFeature(this)">Ja</button>
+                        <button class="toggle-btn cross-btn active" data-option="cookieblock" data-enabled="false" onclick="selectSecurityFeature(this)">Nein</button>
+                    </div>
+                </div>
+                <div class="security-feature">
+                    <span class="feature-label">2FA für privaten Account (falls zutreffend)</span>
+                    <div class="feature-toggle">
+                        <button class="toggle-btn plus-btn" data-option="2fa" data-enabled="true" onclick="selectSecurityFeature(this)">Ja</button>
+                        <button class="toggle-btn cross-btn active" data-option="2fa" data-enabled="false" onclick="selectSecurityFeature(this)">Nein</button>
+                    </div>
+                </div>
+                <div class="security-feature">
+                    <span class="feature-label">IP-Verschleierung (ähnlich VPN)</span>
+                    <div class="feature-toggle">
+                        <button class="toggle-btn plus-btn" data-option="ipmask" data-enabled="true" onclick="selectSecurityFeature(this)">Ja</button>
+                        <button class="toggle-btn cross-btn active" data-option="ipmask" data-enabled="false" onclick="selectSecurityFeature(this)">Nein</button>
+                    </div>
+                </div>
+                <div class="security-feature">
+                    <span class="feature-label">Wunsch: Striktes No-Log-Prinzip</span>
+                    <div class="feature-toggle">
+                        <button class="toggle-btn plus-btn active" data-option="nolog" data-enabled="true" onclick="selectSecurityFeature(this)">Ja</button>
+                        <button class="toggle-btn cross-btn" data-option="nolog" data-enabled="false" onclick="selectSecurityFeature(this)">Nein</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="button-neutral" onclick="showScreen('screen2')">Zurück</button>
+                <button class="button-primary" onclick="handleSecuritySettingsContinue()">Verstanden, weiter zur Meldung</button>
+            </div>
+        </div>
+
+        <div id="screen3" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <div class="progress-text">Schritt 1 von 5</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 20%"></div>
+            </div>
+            
+            <h1>Schritt 1/5: Beschreibung des Vorfalls</h1>
+            
+            <div class="text-block">
+                <p>Bitte beschreiben Sie den Vorfall so detailliert wie nötig. Vermeiden Sie zunächst Angaben, die direkt auf Ihre Person schließen lassen könnten, es sei denn, Sie entscheiden sich bewusst dafür. Sie können Ihre Meldung später überprüfen und bearbeiten.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="incident-description">Beschreibung des Vorfalls:</label>
+                <textarea id="incident-description" placeholder="Beschreiben Sie hier den Korruptionsfall..."></textarea>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="button-neutral" onclick="showScreen('screen2a')">Zurück</button>
+                <button class="button-primary" onclick="saveStep1AndContinue()">Weiter</button>
+            </div>
+        </div>
+
+        <div id="screen4" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <div class="progress-text">Schritt 2 von 5</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 40%"></div>
+            </div>
+            
+            <h1>Schritt 2/5: Beteiligte Personen/Organisationen (Optional)</h1>
+            
+            <div class="text-block">
+                <p>Wenn relevant, nennen Sie hier beteiligte Personen oder Organisationen. Diese Angaben sind freiwillig.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="person-name">Name:</label>
+                <input type="text" id="person-name" placeholder="Name der beteiligten Person (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="person-function">Funktion:</label>
+                <input type="text" id="person-function" placeholder="Position/Rolle (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="organization">Organisation:</label>
+                <input type="text" id="organization" placeholder="Unternehmen/Behörde (optional)">
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="button-neutral" onclick="showScreen('screen3')">Zurück</button>
+                <button class="button-secondary" onclick="showScreen('screen5')">Diesen Schritt überspringen</button>
+                <button class="button-primary" onclick="saveStep2AndContinue()">Weiter</button>
+            </div>
+        </div>
+
+        <div id="screen5" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <div class="progress-text">Schritt 3 von 5</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 60%"></div>
+            </div>
+            
+            <h1>Schritt 3/5: Zeitpunkt und Ort des Vorfalls (Optional)</h1>
+            
+            <div class="text-block">
+                <p>Geben Sie hier Details zu Zeit und Ort an, falls bekannt und relevant. Diese Angaben sind freiwillig.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="incident-date">Datum:</label>
+                <input type="date" id="incident-date">
+            </div>
+            
+            <div class="form-group">
+                <label for="incident-time">Uhrzeit:</label>
+                <input type="time" id="incident-time">
+            </div>
+            
+            <div class="form-group">
+                <label for="incident-location">Ort:</label>
+                <input type="text" id="incident-location" placeholder="Ort des Vorfalls (optional)">
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="button-neutral" onclick="showScreen('screen4')">Zurück</button>
+                <button class="button-secondary" onclick="showScreen('screen6')">Diesen Schritt überspringen</button>
+                <button class="button-primary" onclick="saveStep3AndContinue()">Weiter</button>
+            </div>
+        </div>
+
+        <div id="screen6" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <div class="progress-text">Schritt 4 von 5</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 80%"></div>
+            </div>
+            
+            <h1>Schritt 4/5: Beweismittel hochladen (Optional)</h1>
+            
+            <div class="text-block">
+                <p>Wenn Sie Beweismittel (z.B. Dokumente, Bilder) haben, können Sie diese hier hochladen. Stellen Sie sicher, dass Dateien keine persönlichen Metadaten enthalten, die Sie nicht teilen möchten.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="file-upload">Dateien hochladen:</label>
+                <input type="file" id="file-upload" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt">
+                <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">Unterstützte Formate: PDF, DOC, DOCX, JPG, PNG, TXT</p>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="button-neutral" onclick="showScreen('screen5')">Zurück</button>
+                <button class="button-secondary" onclick="showScreen('screen7')">Diesen Schritt überspringen</button>
+                <button class="button-primary" onclick="saveStep4AndContinue()">Weiter</button>
+            </div>
+        </div>
+
+        <div id="screen7" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Sitzung aktiv</div>
+            <div class="progress-text">Schritt 5 von 5</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%"></div>
+            </div>
+            
+            <h1>Schritt 5/5: Meldung überprüfen und absenden</h1>
+            
+            <div class="text-block">
+                <p>Bitte überprüfen Sie Ihre Angaben sorgfältig. Sie können jeden Schritt über den 'Bearbeiten'-Button korrigieren.</p>
+            </div>
+            
+            <div id="summary-container">
+                </div>
+            
+            <div class="navigation-buttons">
+                <button class="button-neutral" onclick="showScreen('screen6')">Zurück zum letzten Schritt</button>
+                <button class="button-primary" onclick="submitReport()">Sicher und Anonym Absenden</button>
+            </div>
+        </div>
+
+        <div id="screen8" class="screen">
+            <h1>Ihre Meldung wurde erfolgreich und anonym übermittelt!</h1>
+            
+            <div class="success-message">
+                <p>Vielen Dank für Ihren Mut und Ihr Vertrauen. Sie leisten einen wichtigen Beitrag.</p>
+            </div>
+            
+            <div class="text-block">
+                <p><strong>Ihr persönlicher Tracking-Code lautet:</strong></p>
+                <div class="tracking-code" id="tracking-code-display">
+                    </div>
+                <p>Bitte bewahren Sie diesen Code sicher auf. Nur mit diesem Code können Sie (optional und anonym) den Status Ihrer Meldung überprüfen. Es gibt keine andere Möglichkeit, auf Ihre Meldung zuzugreifen.</p>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="button-secondary" onclick="copyTrackingCode()">Code kopieren</button>
+                <button class="button-primary" onclick="showScreen('screen9')">Weiter</button>
+            </div>
+        </div>
+
+        <div id="screen9" class="screen">
+            <h1>Was passiert jetzt & Unterstützung für Sie</h1>
+            
+            <div class="text-block">
+                <h2>Unser Prozess:</h2>
+                <p>Ihre Meldung wird nun von einer unabhängigen Stelle geprüft. Dieser Prozess kann einige Zeit in Anspruch nehmen. Sie können den Bearbeitungsstand anonym mit Ihrem Tracking-Code auf unserer Startseite überprüfen.</p>
+            </div>
+
+            <div class="text-block">
+                <h2>Laufende Sorgfalt & Unterstützung</h2>
+                <p>Auch nach Ihrer Meldung ist uns Ihre Sicherheit und Ihr Wohlbefinden wichtig:</p>
+                <ul style="margin-top: 10px; list-style-position: inside;">
+                    <li><strong>Regelmäßige System-Sicherheitsaudits:</strong> Unsere Plattform wird kontinuierlich überwacht, um den Schutz Ihrer Daten und Anonymität zu gewährleisten.</li>
+                    <li><strong>Proaktive Fallbetreuung (symbolisch):</strong> Im Rahmen der Fallbearbeitung finden symbolisch regelmäßige interne Überprüfungen statt, um sicherzustellen, dass alle Aspekte (inkl. potenzieller Risiken für den Melder, soweit anonym abschätzbar) berücksichtigt werden.</li>
+                    <li><strong>Zukünftige Wohlbefindens-Checks (optional):</strong> Wir prüfen Möglichkeiten, Ihnen über Ihren Tracking-Code optionale, anonyme Ressourcen oder Check-ins anzubieten, falls Sie dies wünschen. Ihre aktuelle Auswahl an Beratungsangeboten bleibt davon unberührt.</li>
+                </ul>
+                <p style="margin-top:10px;"><em>Diese Maßnahmen sind Teil unseres Engagements für einen sicheren und unterstützenden Meldeprozess.</em></p>
+            </div>
+            
+            <div class="text-block">
+                <h2>Unterstützung für Sie:</h2>
+                <p>Eine Meldung abzugeben kann belastend sein. Wenn Sie Unterstützung benötigen, finden Sie hier einige anonyme Beratungsangebote:</p>
+                <ul style="margin-top: 10px; list-style-position: inside;">
+                    <li><a href="#" style="color: #3498db;">Telefonseelsorge (anonym und kostenfrei)</a></li>
+                    <li><a href="#" style="color: #3498db;">Informationen zu rechtlichem Beistand für Whistleblower</a></li>
+                </ul>
+            </div>
+            
+            <div class="text-block">
+                <p><strong>Wie fühlen Sie sich gerade?</strong></p>
+                <p style="font-size: 12px; color: #7f8c8d;">Ihre Antwort wird nicht gespeichert und dient nur Ihrer Reflexion.</p>
+                <div class="mood-buttons">
+                    <button class="mood-button" onclick="selectMood(this)">Erleichtert</button>
+                    <button class="mood-button" onclick="selectMood(this)">Neutral</button>
+                    <button class="mood-button" onclick="selectMood(this)">Besorgt</button>
+                    <button class="mood-button" onclick="selectMood(this)">Ich möchte nicht antworten</button>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="button-primary" onclick="endSession()">Sichere Sitzung beenden</button>
+            </div>
+        </div>
+
+        <div id="tracking-lookup" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Abfrage</div>
+            <h1>Status Ihrer Meldung prüfen</h1>
+            
+            <div class="text-block">
+                <p>Geben Sie hier Ihren Tracking-Code ein, um den aktuellen Status Ihrer anonymen Meldung zu überprüfen.</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="tracking-input">Tracking-Code:</label>
+                <input type="text" id="tracking-input" placeholder="z.B. ABC-123-XYZ" style="text-transform: uppercase; letter-spacing: 2px; text-align: center; font-weight: bold;">
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="button-primary" onclick="lookupTrackingCode()">Status prüfen</button>
+                <button class="button-neutral" onclick="showScreen('screen1')">Zurück zur Startseite</button>
+            </div>
+            
+            <div id="tracking-result" style="display: none;">
+                </div>
+        </div>
+
+        <div id="report-view" class="screen">
+            <div class="anonymity-indicator">🔒 Anonyme Ansicht</div>
+            <h1>Ihre Meldung</h1>
+            
+            <div class="text-block" style="background-color: #d4edda; border-left-color: #27ae60;">
+                <p><strong>Status:</strong> <span id="report-status">In Bearbeitung</span></p>
+                <p><strong>Eingereicht am:</strong> <span id="report-date"></span></p>
+                <p><strong>Tracking-Code:</strong> <span id="report-tracking-code" style="font-weight: bold; letter-spacing: 1px;"></span></p>
+            </div>
+            
+            <div id="report-content">
+                </div>
+            
+            <div class="text-block">
+                <h3>Aktueller Bearbeitungsstand:</h3>
+                <div id="status-timeline">
+                    <div class="status-item completed">✅ Meldung eingegangen</div>
+                    <div class="status-item completed">✅ Erste Prüfung abgeschlossen</div>
+                    <div class="status-item active">🔄 Detailprüfung läuft</div>
+                    <div class="status-item pending">⏳ Rückmeldung an Melder</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="button-secondary" onclick="showScreen('tracking-lookup')">Anderen Code prüfen</button>
+                <button class="button-neutral" onclick="showScreen('screen1')">Zur Startseite</button>
+            </div>
+        </div>
+
+    </div> <button class="help-chat-button" onclick="openChat()" title="Hilfe-Chat (Anonym)">
+        💬 Hilfe-Chat
+    </button>
+
+    <div id="chat-overlay" class="chat-overlay">
+        <div class="chat-window">
+            <div class="chat-header">
+                <h2>Anonymer Hilfe-Chat mit dem System-Assistenten</h2>
+                <button style="float: right;" class="button-neutral" onclick="closeChat()">Chat schließen</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message system">
+                    Willkommen! Wie kann ich Ihnen helfen? Bitte geben Sie keine persönlichen Informationen in diesen Chat ein.
+                </div>
+            </div>
+            <div class="chat-input-group">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Ihre Frage..." onkeypress="handleChatKeyPress(event)">
+                <button class="button-secondary" onclick="sendChatMessage()">Senden</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let reportData = {
+            description: '',
+            personName: '',
+            personFunction: '',
+            organization: '',
+            date: '',
+            time: '',
+            location: '',
+            files: [],
+            securitySettings: { 
+                vpn: true,
+                cookieblock: false,
+                '2fa': false,
+                ipmask: false,
+                nolog: true
+            }
+        };
+
+        // Storage for submitted reports (simulated database)
+        let submittedReports = {};
+        let cameFromScreen7 = false; // Flag for navigation between screen7 and screen2a
+
+        // Navigation functions
+        function showScreen(screenId) {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+            
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                 targetScreen.classList.add('active');
+            } else {
+                console.error("Screen with ID " + screenId + " not found.");
+                document.getElementById('screen1').classList.add('active'); // Fallback to home
+            }
+            
+            if (screenId === 'screen7') {
+                generateSummary(); // Regenerate summary every time screen7 is shown
+            }
+            if (screenId === 'screen3') {
+                const backButton = document.querySelector('#screen3 .navigation-buttons .button-neutral');
+                 if (document.getElementById('screen2a').classList.contains('screen')) { 
+                    backButton.setAttribute('onclick', "showScreen('screen2a')");
+                 } else { 
+                    backButton.setAttribute('onclick', "showScreen('screen2')");
+                 }
+            }
+        }
+
+        // Security Feature Toggle for screen2a
+        function selectSecurityFeature(btnElement) {
+            const featureToggle = btnElement.parentElement;
+            const optionName = btnElement.dataset.option;
+            const isEnabled = btnElement.dataset.enabled === 'true';
+
+            if (!reportData.securitySettings) {
+                reportData.securitySettings = {};
+            }
+            reportData.securitySettings[optionName] = isEnabled;
+
+            featureToggle.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        function navigateToEditSecurity() {
+            cameFromScreen7 = true;
+            showScreen('screen2a');
+        }
+
+        function handleSecuritySettingsContinue() {
+            if (cameFromScreen7) {
+                cameFromScreen7 = false; // Reset flag
+                showScreen('screen7');    // Go back to summary
+            } else {
+                showScreen('screen3');    // Normal flow: go to report step 1
+            }
+        }
+
+
+        // Step saving functions
+        function saveStep1AndContinue() {
+            const description = document.getElementById('incident-description').value;
+            reportData.description = description;
+            
+            if (description.trim()) {
+                showFeedback('Schritt 1 gespeichert ✓');
+                setTimeout(() => showScreen('screen4'), 500);
+            } else {
+                alert('Bitte geben Sie eine Beschreibung des Vorfalls ein.');
+            }
+        }
+
+        function saveStep2AndContinue() {
+            reportData.personName = document.getElementById('person-name').value;
+            reportData.personFunction = document.getElementById('person-function').value;
+            reportData.organization = document.getElementById('organization').value;
+            
+            showFeedback('Schritt 2 gespeichert ✓');
+            setTimeout(() => showScreen('screen5'), 500);
+        }
+
+        function saveStep3AndContinue() {
+            reportData.date = document.getElementById('incident-date').value;
+            reportData.time = document.getElementById('incident-time').value;
+            reportData.location = document.getElementById('incident-location').value;
+            
+            showFeedback('Schritt 3 gespeichert ✓');
+            setTimeout(() => showScreen('screen6'), 500);
+        }
+
+        function saveStep4AndContinue() {
+            const fileInput = document.getElementById('file-upload');
+            reportData.files = Array.from(fileInput.files);
+            
+            showFeedback('Schritt 4 gespeichert ✓');
+            setTimeout(() => showScreen('screen7'), 500);
+        }
+
+        function showFeedback(message) {
+            const feedback = document.createElement('div');
+            feedback.style.cssText = 'position:fixed;top:20px;right:20px;background:#27ae60;color:white;padding:10px 20px;border-radius:5px;z-index:3000;box-shadow: 0 2px 5px rgba(0,0,0,0.2);transition: opacity 0.5s ease-out;';
+            feedback.textContent = message;
+            document.body.appendChild(feedback);
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => feedback.remove(), 500);
+            } , 2000);
+        }
+
+        function generateSummary() {
+            const container = document.getElementById('summary-container');
+            let html = '';
+            
+            if (reportData.description) {
+                html += `
+                    <div class="summary-section">
+                        <h3>Beschreibung des Vorfalls <button class="edit-button" onclick="showScreen('screen3')">Bearbeiten</button></h3>
+                        <p>${reportData.description.replace(/\n/g, '<br>')}</p>
+                    </div>
+                `;
+            }
+            
+            if (reportData.personName || reportData.personFunction || reportData.organization) {
+                html += `
+                    <div class="summary-section">
+                        <h3>Beteiligte Personen/Organisationen <button class="edit-button" onclick="showScreen('screen4')">Bearbeiten</button></h3>
+                        ${reportData.personName ? `<p><strong>Name:</strong> ${reportData.personName}</p>` : ''}
+                        ${reportData.personFunction ? `<p><strong>Funktion:</strong> ${reportData.personFunction}</p>` : ''}
+                        ${reportData.organization ? `<p><strong>Organisation:</strong> ${reportData.organization}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (reportData.date || reportData.time || reportData.location) {
+                html += `
+                    <div class="summary-section">
+                        <h3>Zeitpunkt und Ort <button class="edit-button" onclick="showScreen('screen5')">Bearbeiten</button></h3>
+                        ${reportData.date ? `<p><strong>Datum:</strong> ${reportData.date}</p>` : ''}
+                        ${reportData.time ? `<p><strong>Uhrzeit:</strong> ${reportData.time}</p>` : ''}
+                        ${reportData.location ? `<p><strong>Ort:</strong> ${reportData.location}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            if (reportData.files.length > 0) {
+                html += `
+                    <div class="summary-section">
+                        <h3>Beweismittel <button class="edit-button" onclick="showScreen('screen6')">Bearbeiten</button></h3>
+                        <p><strong>Hochgeladene Dateien:</strong></p>
+                        <ul>
+                            ${reportData.files.map(file => `<li>${file.name} (${Math.round(file.size/1024)} KB)</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Check if any report data exists (excluding description for this specific message)
+            const hasOptionalData = reportData.personName || reportData.personFunction || reportData.organization || 
+                                  reportData.date || reportData.time || reportData.location || reportData.files.length > 0;
+
+            if (!reportData.description && !hasOptionalData) {
+                html = '<div class="summary-section"><p>Keine Daten erfasst. Bitte gehen Sie zurück und füllen Sie mindestens die Beschreibung aus.</p></div>';
+            } else if (!reportData.description) {
+                 html = '<div class="summary-section"><p><strong>Warnung: Keine Beschreibung des Vorfalls erfasst.</strong> Bitte gehen Sie zurück und füllen Sie Schritt 1 aus.</p></div>' + html;
+            } else if (!hasOptionalData && reportData.description) {
+                 // Only description is present, this is fine, don't add a specific message for it.
+            }
+
+
+            // Add Security Settings Summary
+            let securityHtml = `
+                <div class="summary-section">
+                    <h3>Gewählte Sicherheitseinstellungen (Symbolisch) <button class="edit-button" onclick="navigateToEditSecurity()">Bearbeiten</button></h3>
+            `;
+            const settings = reportData.securitySettings || {}; // Ensure settings is an object
+            const settingLabels = {
+                vpn: "VPN nutzen",
+                cookieblock: "Cookie-Sperre (Browser-Einstellung)",
+                '2fa': "2FA für privaten Account", // Key '2fa' used here
+                ipmask: "IP-Verschleierung",
+                nolog: "Wunsch: Striktes No-Log-Prinzip"
+            };
+
+            for (const key in settingLabels) {
+                if (Object.hasOwnProperty.call(settingLabels, key)) {
+                    const label = settingLabels[key];
+                    const value = settings[key] ? 'Ja' : 'Nein'; // Check settings[key]
+                    const valueClass = settings[key] ? 'text-success' : 'text-danger';
+                    securityHtml += `<p><strong>${label}:</strong> <span class="${valueClass}">${value}</span></p>`;
+                }
+            }
+            securityHtml += `</div>`;
+            html += securityHtml; // Append security summary to the main summary HTML
+            
+            container.innerHTML = html;
+        }
+
+        function submitReport() {
+            if (!reportData.description.trim()) {
+                alert('Eine Beschreibung des Vorfalls ist erforderlich. Bitte gehen Sie zu Schritt 1 zurück.');
+                showScreen('screen3');
+                return;
+            }
+            
+            const trackingCode = generateTrackingCode();
+            
+            submittedReports[trackingCode] = {
+                ...JSON.parse(JSON.stringify(reportData)), 
+                submissionDate: new Date().toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                status: 'Eingegangen', 
+                trackingCode: trackingCode,
+                timeline: [ 
+                    { stage: "Meldung eingegangen", completed: true, active: false, pending: false, timestamp: new Date() },
+                    { stage: "Erste Prüfung", completed: false, active: true, pending: false, timestamp: null },
+                    { stage: "Detailprüfung", completed: false, active: false, pending: true, timestamp: null },
+                    { stage: "Rückmeldung an Melder", completed: false, active: false, pending: true, timestamp: null },
+                    { stage: "Fall abgeschlossen", completed: false, active: false, pending: true, timestamp: null }
+                ]
+            };
+            
+            document.getElementById('tracking-code-display').textContent = trackingCode;
+            showScreen('screen8');
+        }
+
+        function generateTrackingCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = [];
+            for(let i=0; i<3; i++){
+                let segment = '';
+                for (let j = 0; j < 3; j++) {
+                    segment += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                code.push(segment);
+            }
+            return code.join('-');
+        }
+
+        function copyTrackingCode() {
+            const code = document.getElementById('tracking-code-display').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showFeedback('Code in Zwischenablage kopiert ✓');
+            }).catch(err => {
+                console.warn('Async clipboard copy failed, trying fallback:', err);
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = code;
+                    textarea.style.position = 'fixed'; 
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    showFeedback('Code in Zwischenablage kopiert ✓ (Fallback)');
+                } catch (e) {
+                    showFeedback('Fehler beim Kopieren.');
+                    console.error('Fallback copy failed:', e);
+                }
+            });
+        }
+
+        function selectMood(button) {
+            document.querySelectorAll('.mood-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            button.classList.add('selected');
+        }
+
+        function endSession() {
+            if (confirm('Möchten Sie die sichere Sitzung wirklich beenden? Alle nicht gesendeten Daten gehen verloren.')) {
+                reportData = { 
+                    description: '', personName: '', personFunction: '', organization: '',
+                    date: '', time: '', location: '', files: [],
+                    securitySettings: { vpn: true, cookieblock: false, '2fa': false, ipmask: false, nolog: true }
+                };
+                
+                document.querySelectorAll('input[type="text"], input[type="date"], input[type="time"], textarea').forEach(field => field.value = '');
+                document.querySelectorAll('input[type="file"]').forEach(field => field.value = null);
+                document.querySelectorAll('.mood-button.selected').forEach(btn => btn.classList.remove('selected'));
+                
+                const secScreen = document.getElementById('screen2a');
+                if(secScreen) { // Visually reset toggles on screen2a to their defaults
+                    Object.keys(reportData.securitySettings).forEach(optionKey => {
+                        const isEnabledByDefault = reportData.securitySettings[optionKey];
+                        const plusBtn = secScreen.querySelector(`.toggle-btn.plus-btn[data-option="${optionKey}"]`);
+                        const crossBtn = secScreen.querySelector(`.toggle-btn.cross-btn[data-option="${optionKey}"]`);
+                        if(plusBtn && crossBtn){
+                            plusBtn.classList.toggle('active', isEnabledByDefault);
+                            crossBtn.classList.toggle('active', !isEnabledByDefault);
+                        }
+                    });
+                }
+
+                showFeedback('Sitzung sicher beendet ✓');
+                setTimeout(() => showScreen('screen1'), 1000);
+            }
+        }
+
+        // Chat functions
+        function openChat() {
+            document.getElementById('chat-overlay').classList.add('active');
+            document.getElementById('chat-input').focus();
+        }
+
+        function closeChat() {
+            document.getElementById('chat-overlay').classList.remove('active');
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            addChatMessage(message, 'user');
+            input.value = '';
+            setTimeout(() => {
+                const response = generateChatResponse(message);
+                addChatMessage(response, 'system');
+            }, 500);
+        }
+
+        function addChatMessage(message, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.textContent = message;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function generateChatResponse(userMessage) {
+            const msg = userMessage.toLowerCase();
+            if (msg.includes('anonym') || msg.includes('sicher')) return 'Ihre Anonymität ist vollständig geschützt. Wir verwenden keine Cookies, speichern keine IP-Adressen und alle Daten werden verschlüsselt übertragen.';
+            if (msg.includes('prozess') || msg.includes('ablauf')) return 'Der Meldeprozess besteht aus 5 einfachen Schritten. Sie können jederzeit zurückgehen und Ihre Angaben ändern. Am Ende erhalten Sie einen anonymen Tracking-Code.';
+            if (msg.includes('tracking') || msg.includes('code')) return 'Mit Ihrem Tracking-Code können Sie anonym den Status Ihrer Meldung überprüfen. Bewahren Sie ihn sicher auf - wir können ihn nicht wiederherstellen.';
+            if (msg.includes('hilfe') || msg.includes('problem')) return 'Ich helfe gerne! Sie können Fragen zur Anonymität, zum Meldeprozess oder zu technischen Problemen stellen. Was beschäftigt Sie?';
+            if (msg.includes('beweise') || msg.includes('datei')) return 'Sie können Dateien wie Dokumente oder Bilder hochladen. Achten Sie darauf, dass diese keine persönlichen Metadaten enthalten, die Sie nicht teilen möchten.';
+            if (msg.includes('zeit') || msg.includes('dauer')) return 'Die Bearbeitung Ihrer Meldung kann einige Zeit in Anspruch nehmen. Sie erhalten Updates über den Status mit Ihrem Tracking-Code.';
+            return 'Vielen Dank für Ihre Frage. Falls Sie spezifische Fragen zur Anonymität, zum Meldeprozess oder zu technischen Aspekten haben, helfe ich gerne weiter.';
+        }
+        
+        function lookupTrackingCode() {
+            const codeInput = document.getElementById('tracking-input');
+            const code = codeInput.value.toUpperCase();
+            const resultDiv = document.getElementById('tracking-result');
+            const reportViewDiv = document.getElementById('report-view');
+            
+            if (!code.match(/^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}$/)) {
+                resultDiv.innerHTML = '<p style="color: red;">Ungültiges Code-Format. Bitte geben Sie den Code im Format ABC-123-XYZ ein.</p>';
+                resultDiv.style.display = 'block';
+                reportViewDiv.style.display = 'none';
+                return;
+            }
+
+            const report = submittedReports[code];
+            if (report) {
+                document.getElementById('report-status').textContent = report.status;
+                document.getElementById('report-date').textContent = report.submissionDate;
+                document.getElementById('report-tracking-code').textContent = report.trackingCode;
+                
+                let reportContentHtml = '';
+                if(report.description) reportContentHtml += `<div class="report-section"><h4>Beschreibung</h4><p>${report.description.replace(/\n/g, '<br>')}</p></div>`;
+                // Add other sections from report if needed for display
+
+                document.getElementById('report-content').innerHTML = reportContentHtml || '<p>Keine Detailinformationen für diese Meldung (oder nur Beschreibung wurde übermittelt).</p>';
+                
+                const timelineDiv = document.getElementById('status-timeline');
+                timelineDiv.innerHTML = ''; 
+                report.timeline.forEach(item => {
+                    let itemClass = 'status-item';
+                    if (item.completed) itemClass += ' completed';
+                    if (item.active) itemClass += ' active';
+                    if (item.pending && !item.completed && !item.active) itemClass += ' pending';
+                    
+                    let icon = item.pending ? '⏳' : (item.active ? '🔄' : (item.completed ? '✅' : '◻️'));
+                    timelineDiv.innerHTML += `<div class="${itemClass}">${icon} ${item.stage} ${item.timestamp ? `(${new Date(item.timestamp).toLocaleDateString('de-DE')})` : ''}</div>`;
+                });
+
+                showScreen('report-view');
+                resultDiv.style.display = 'none'; 
+                codeInput.value = ''; 
+            } else {
+                resultDiv.innerHTML = '<p style="color: orange;">Keine Meldung für diesen Code gefunden. Bitte überprüfen Sie Ihre Eingabe.</p>';
+                resultDiv.style.display = 'block';
+                reportViewDiv.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen('screen1'); 
+
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('.button-primary, .button-secondary, .button-neutral, .edit-button')) {
+                    setTimeout(() => {
+                        const activeScreen = document.querySelector('.screen.active');
+                        if (activeScreen) {
+                            const firstInput = activeScreen.querySelector('input:not([type="file"]):not([disabled]):not([type="button"]), textarea:not([disabled])');
+                            if (firstInput && firstInput.offsetHeight > 0) { 
+                                firstInput.focus();
+                            }
+                        }
+                    }, 150); 
+                }
+            });
+            
+            const trackingInput = document.getElementById('tracking-input');
+            if (trackingInput) {
+                trackingInput.addEventListener('input', function(e) {
+                    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+                    let rawValue = value.replace(/-/g, '');
+                    let formattedValue = '';
+                    for(let i = 0; i < rawValue.length; i++) {
+                        if (i > 0 && i % 3 === 0 && formattedValue.length < 10) { 
+                            formattedValue += '-';
+                        }
+                        formattedValue += rawValue[i];
+                    }
+                    e.target.value = formattedValue.substring(0, 11); 
+                });
+                
+                trackingInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        lookupTrackingCode();
+                    }
+                });
+            }
+
+            // Initialize default security toggles visually on screen2a
+            const secScreen = document.getElementById('screen2a');
+            if(secScreen) {
+                 Object.keys(reportData.securitySettings).forEach(optionKey => {
+                    const isEnabledByDefault = reportData.securitySettings[optionKey];
+                    const plusBtn = secScreen.querySelector(`.toggle-btn.plus-btn[data-option="${optionKey}"]`);
+                    const crossBtn = secScreen.querySelector(`.toggle-btn.cross-btn[data-option="${optionKey}"]`);
+                    if(plusBtn && crossBtn){ // Ensure buttons exist
+                        plusBtn.classList.toggle('active', isEnabledByDefault);
+                        crossBtn.classList.toggle('active', !isEnabledByDefault);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
